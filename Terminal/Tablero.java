@@ -5,33 +5,32 @@ import java.awt.*;
 public class Tablero {
     private final int filas = 10;
     private final int columnas = 10;
-    private String[][] casillas;
+    private String[][] casillasLogicas;
+    private char[][] casillas;
     public Tablero() {
-        casillas = new String[filas][columnas];
+        casillasLogicas = new String[filas][columnas];
         inicializarTablero();
     }
 
     private void inicializarTablero() {
         for (int i = 0; i < filas; i++) {
             for (int j = 0; j < columnas; j++) {
-                casillas[i][j] = "\uD83C\uDF0A";
+                casillasLogicas[i][j] = "🌊"; // Agua
             }
         }
     }
 
     public boolean colocarBarco(Barco barco) {
+        // Verificar que todas las posiciones son válidas
         for (Point p : barco.getPosiciones()) {
-            int x = p.x;
-            int y = p.y;
-            if (!casillaEsValida(x, y) || !casillas[y][x].equals("🌊")) {
+            if (!casillaEsValida(p.x, p.y) || !casillasLogicas[p.y][p.x].equals("🌊")) {
                 return false;
             }
         }
-
+        // Colocar el barco
         for (Point p : barco.getPosiciones()) {
-            casillas[p.y][p.x] = "🚢";  // Aquí debe cambiar el agua por barco
+            casillasLogicas[p.y][p.x] = "🚢";
         }
-
         return true;
     }
 
@@ -49,45 +48,51 @@ public class Tablero {
         for (int i = 0; i < filas; i++) {
             System.out.printf("%2d ", i + 1);
             for (int j = 0; j < columnas; j++) {
-                System.out.print(" " + casillas[i][j] + " ");
+                System.out.print(" " + casillasLogicas[i][j] + " ");
             }
             System.out.println();
         }
     }
 
-    // Puedes agregar más métodos luego como recibirTiro, marcar impacto, etc.
-    // Recibe un disparo en la coordenada (x, y)
     public boolean recibirTiro(int x, int y) {
         if (!casillaEsValida(x, y)) {
             System.out.println("Coordenada inválida.");
             return false;
         }
 
-        String casilla = casillas[y][x];
+        String casilla = casillasLogicas[y][x];
 
-        // Dentro de recibirTiro()
         switch (casilla) {
-            case "🚢":
-                casillas[y][x] = "💥";  // impacto
+            case "🚢": // Barco
+                casillasLogicas[y][x] = "💥"; // Impacto
                 System.out.println("¡Impacto!");
                 return true;
-
-            case "🌊":
-                casillas[y][x] = "❌";  // fallo
+            case "🌊": // Agua
+                casillasLogicas[y][x] = "❌"; // Fallo
                 System.out.println("Agua...");
                 return false;
-            case "X":
-            case "O":
-                System.out.println("Ya disparaste aquí.");
+            case "💥": // Ya impactado
+            case "❌": // Ya disparado aquí (agua)
+                System.out.println("Ya disparaste aquí antes.");
                 return false;
-
             default:
                 System.out.println("Casilla desconocida.");
                 return false;
         }
     }
 
-    public String[][] getCasillas(int fila, int columna) {
-        return casillas;
+    public void disparar(int fila, int columna) {
+        if (casillas[fila][columna] == 'B') {
+            casillas[fila][columna] = 'X'; // tocado
+        } else if (casillas[fila][columna] == 'A') {
+            casillas[fila][columna] = 'O'; // fallido
+        }
+    }
+
+    public char getCasilla(int fila, int columna) {
+        return casillas[fila][columna];
+    }
+    public String getCasillaVisual(int fila, int columna) {
+        return casillasLogicas[fila][columna];
     }
 }

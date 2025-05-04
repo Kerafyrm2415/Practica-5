@@ -11,6 +11,10 @@ public class Barco {
         this.tamaño = tamaño;
         this.posiciones = new ArrayList<>();
         this.impactos = new ArrayList<>();
+        // Inicializar impactos
+        for (int i = 0; i < tamaño; i++) {
+            impactos.add(false);
+        }
     }
 
     // Colocamos el barco a partir de una posición y orientación
