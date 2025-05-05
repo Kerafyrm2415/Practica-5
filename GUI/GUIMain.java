@@ -50,19 +50,19 @@ public class GUIMain {
 
             tableroLogico.recibirTiro(0,0);
             tableroJugador1.actualizarTableroVisual(tableroLogico);
-            tableroLogico.imprimirTablero();
+            tableroLogico.imprimirTablero(true);
         });
     }
 
     public static void imprimirTableroTerminal(Tablero logico) {
         for (int fila = 0; fila < 10; fila++) {
             for (int col = 0; col < 10; col++) {
-                char estado = logico.getCasilla(fila, col);
+                String estado = logico.getCasilla(fila, col);
                 switch (estado) {
-                    case 'A': System.out.print("🌊 "); break;
-                    case 'B': System.out.print("🚢 "); break;
-                    case 'X': System.out.print("💥 "); break;
-                    case 'O': System.out.print("❌ "); break;
+                    case "A": System.out.print("🌊 "); break;
+                    case "B": System.out.print("🚢 "); break;
+                    case "X": System.out.print("💥 "); break;
+                    case "O": System.out.print("❌ "); break;
                 }
             }
             System.out.println();

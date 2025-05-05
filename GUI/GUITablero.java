@@ -36,7 +36,7 @@ public class GUITablero {
     public void actualizarTableroVisual(Tablero tableroLogico) {
         for (int fila = 0; fila < 10; fila++) {
             for (int col = 0; col < 10; col++) {
-                String estadoCasilla = tableroLogico.getCasillaVisual(fila, col);
+                String estadoCasilla = tableroLogico.getCasilla(fila, col);
                 botones[fila][col].setText(estadoCasilla);
             }
         }
