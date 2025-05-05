@@ -17,7 +17,16 @@ public class Juego {
     }
 
     public void iniciarJuego(Scanner scanner) {
+        // Fase de colocación
+        System.out.println("\n=== FASE DE COLOCACIÓN ===");
         colocarBarcos(scanner, jugador1);
+        colocarBarcos(scanner, jugador2);
+
+        // Fase de batalla
+        System.out.println("\n=== FASE DE BATALLA ===");
+        faseDeDisparos(scanner);
+
+        mostrarGanador();
     }
     public boolean colocarBarco(Jugador jugador, Barco barco) {
         return jugador.agregarBarco(barco);
@@ -29,7 +38,12 @@ public class Juego {
         Jugador atacante = turnoActual;
         Jugador defensor = (turnoActual == jugador1) ? jugador2 : jugador1;
 
+        String resultado = defensor.getTableroPropio().getCasilla(y, x);
+        atacante.getTableroRival().actualizarCasilla(y, x, resultado);
+
+
         boolean impacto = atacante.realizarDisparo(x, y, defensor);
+
 
         if (defensor.haPerdido()) {
             juegoTerminado = true;
@@ -75,6 +89,7 @@ public class Juego {
                 }
             }
         }
+        limpiarPantalla();
     }
 
     private void faseDeDisparos(Scanner scanner) {
@@ -89,7 +104,16 @@ public class Juego {
 
             Point coordenada = obtenerCoordenadaDisparo(scanner, atacante);
             boolean impacto = realizarDisparo(coordenada.x, coordenada.y);
-
+            if (impacto) {
+                System.out.println("¡Disparo exitoso! Obtienes un turno extra.");
+            } else {
+                System.out.println("Disparo fallido... turno del oponente.");
+            }
+            try {
+                Thread.sleep(750);
+            }catch (InterruptedException e) {}
+            mostrarTableros(atacante);
+            limpiarPantalla();
             if (impacto && defensor.haPerdido()) {
                 juegoTerminado = true;
             }
@@ -147,5 +171,10 @@ public class Juego {
 
     public Jugador getJugador2() {
         return jugador2;
+    }
+    private void limpiarPantalla() {
+        for (int i = 0; i < 50; i++) {
+            System.out.println("\n");
+        }
     }
 }

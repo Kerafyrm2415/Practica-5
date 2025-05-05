@@ -13,6 +13,7 @@ public class Main {
                 "                                                                                                    \n\n\n practica realizada por: Derek Ramón Garzón Vizcarra");
         System.out.println("Seleccione una opción: \n 1.- Jugar \n 2.- Salir\n");
         opcion = sc.nextInt();
+        sc.nextLine();
         while (opcion != 1 && opcion != 2) {
             System.out.println("Opción no valida: Escriba el numero de una de las dos opciones");
             opcion = sc.nextInt();

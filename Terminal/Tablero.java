@@ -40,7 +40,7 @@ public class Tablero {
 
     public void imprimirTablero(boolean mostrarBarcos) {
         System.out.print("   ");
-        for (char c = 'A'; c < 'A' + columnas; c++) {
+        for (char c = 'A'; c < 'A' + columnas; c++) {  // Un pequeño truco que encontre el siguiente semestre, esto hace que las letras se vayan recorriendo una por una
             System.out.print(c + " ");
         }
         System.out.println();
@@ -49,12 +49,23 @@ public class Tablero {
             System.out.printf("%2d ", i + 1);
             for (int j = 0; j < columnas; j++) {
                 String simbolo = casilla[i][j];
-
-                if (!mostrarBarcos && simbolo.equals("🚢")) {
-                    System.out.print("🌊 ");
+                if (!mostrarBarcos) {
+                    // Mostrar impacto aunque sea un barco oculto
+                    if (simbolo.equals("💥")) {
+                        System.out.print("💥 ");
+                    }
+                    // Ocultar barcos no impactados
+                    else if (simbolo.equals("🚢")) {
+                        System.out.print("🌊 ");
+                    }
+                    // Mostrar otros símbolos normalmente
+                    else {
+                        System.out.print(simbolo + " ");
+                    }
                 } else {
                     System.out.print(simbolo + " ");
                 }
+
             }
             System.out.println();
         }
@@ -64,7 +75,6 @@ public class Tablero {
         if (!casillaEsValida(x, y)) {
             return false;
         }
-
         switch (casilla[y][x]) {
             case "🚢":
                 casilla[y][x] = "💥";
@@ -74,6 +84,12 @@ public class Tablero {
                 return false;
             default:
                 return false; // Ya fue disparada
+        }
+    }
+
+    public void actualizarCasilla(int fila, int columna, String simbolo) {
+        if (!casillaEsValida(fila, columna)) {
+            casilla[fila][columna] = simbolo;
         }
     }
 
