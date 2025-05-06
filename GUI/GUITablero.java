@@ -34,7 +34,6 @@ public class GUITablero {
                 boton.addActionListener(e -> {
                     filaSeleccionada = finalF;
                     columnaSeleccionada = finalC;
-                    System.out.println("Casilla seleccionada: " + (char) ('A' + finalC) + (finalF + 1));
                 });
 
                 botones[f][c] = boton;
