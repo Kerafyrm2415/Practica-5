@@ -14,10 +14,10 @@ public class GUITablero {
 
     public GUITablero(int filas, int columnas, Tablero tableroLogico) {
         panel = new JPanel();
-        panel.setLayout(new GridLayout(filas + 1, columnas + 1)); // +1 para encabezados
+        panel.setLayout(new GridLayout(filas + 1, columnas + 1));
         botones = new JButton[filas][columnas];
 
-        panel.add(new JLabel("")); // esquina vacía
+        panel.add(new JLabel(""));
 
         for (int c = 0; c < columnas; c++) {
             char letra = (char) ('A' + c);
@@ -60,7 +60,12 @@ public class GUITablero {
                 JButton boton = new JButton("🌊");
                 final int fila = f;
                 final int col = c;
-                boton.addActionListener(e -> manejadorCasilla.accept(fila, col));
+                boton.addActionListener(e -> {
+                    filaSeleccionada = fila;
+                    columnaSeleccionada = col;
+                    System.out.println("Casilla seleccionada: " + (char) ('A' + col) + (fila + 1));
+                    manejadorCasilla.accept(fila, col);
+                });
                 botones[f][c] = boton;
                 panel.add(boton);
             }
@@ -76,6 +81,15 @@ public class GUITablero {
             for (int col = 0; col < 10; col++) {
                 String estadoCasilla = tableroLogico.getCasilla(fila, col);
                 botones[fila][col].setText(estadoCasilla);
+                if (estadoCasilla.equals("🌊")) {
+                    botones[fila][col].setBackground(new Color(96, 196, 225));
+                } else if (estadoCasilla.equals("🚢")) {
+                    botones[fila][col].setBackground(new Color(117, 124, 129));
+                } else if (estadoCasilla.equals("💥")) {
+                    botones[fila][col].setBackground(new Color(203, 24, 15));
+                } else if (estadoCasilla.equals("❌")) {
+                    botones[fila][col].setBackground(new Color(6, 84, 138));
+                }
             }
         }
     }

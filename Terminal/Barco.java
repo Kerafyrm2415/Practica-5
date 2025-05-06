@@ -30,6 +30,7 @@ public class Barco {
             impactos.add(false);
         }
     }
+
     // Colocamos el barco a partir de una posición y orientación
     public void colocarEn(int x, int y, boolean horizontal, int limite) {
         posiciones.clear();
