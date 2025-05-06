@@ -7,8 +7,8 @@ import javax.swing.border.Border;
 import java.awt.*;
 
 public class GUIJuego {
-    private final int[] tamañosBarcosJugador1 = {1};
-    private final int[] tamañosBarcosJugador2 = {1};
+    private final int[] tamañosBarcosJugador1 = {5, 4, 3, 3, 2, 2};
+    private final int[] tamañosBarcosJugador2 = {5, 4, 3, 3, 2, 2};
     private int barcoActualJugador1 = 0;
     private int barcoActualJugador2 = 0;
     private boolean colocandoBarcosJugador1 = true;

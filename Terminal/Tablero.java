@@ -1,5 +1,6 @@
 package Terminal;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,6 +123,7 @@ public class Tablero {
                 casilla[p.y][p.x] = "🔥"; // Asigna directamente el emoji
             }
         }
+        JOptionPane.showMessageDialog(null, "Hundiste un barco!");
     }
     public boolean todosBarcosHundidos() {
         return barcos.stream().allMatch(Barco::estaHundido);
