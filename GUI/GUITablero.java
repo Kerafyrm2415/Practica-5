@@ -80,14 +80,25 @@ public class GUITablero {
             for (int col = 0; col < 10; col++) {
                 String estadoCasilla = tableroLogico.getCasilla(fila, col);
                 botones[fila][col].setText(estadoCasilla);
-                if (estadoCasilla.equals("🌊")) {
-                    botones[fila][col].setBackground(new Color(96, 196, 225));
-                } else if (estadoCasilla.equals("🚢")) {
-                    botones[fila][col].setBackground(new Color(117, 124, 129));
-                } else if (estadoCasilla.equals("💥")) {
-                    botones[fila][col].setBackground(new Color(203, 24, 15));
-                } else if (estadoCasilla.equals("❌")) {
-                    botones[fila][col].setBackground(new Color(6, 84, 138));
+                switch (estadoCasilla) {
+                    case "🌊":
+                        botones[fila][col].setBackground(new Color(96, 196, 225));
+                        break;
+                    case "🚢":
+                        botones[fila][col].setBackground(new Color(117, 124, 129));
+                        break;
+                    case "💥":
+                        botones[fila][col].setBackground(new Color(203, 24, 15));
+                        break;
+                    case "❌":
+                        botones[fila][col].setBackground(new Color(6, 84, 138));
+                        break;
+                    case "🔥":
+                        botones[fila][col].setBackground(new Color(255, 69, 0)); // Fuego anaranjado intenso
+                        break;
+                    default:
+                        botones[fila][col].setBackground(Color.LIGHT_GRAY);
+                        break;
                 }
             }
         }

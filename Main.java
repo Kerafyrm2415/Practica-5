@@ -1,4 +1,6 @@
 import java.util.Scanner;
+
+import GUI.GUIJuego;
 import Terminal.*;
 
 public class Main {
@@ -33,7 +35,7 @@ public class Main {
         System.out.print("Nombre del Jugador 2: ");
         String nombreJ2 = sc.nextLine();
 
-        Juego juego = new Juego(nombreJ1, nombreJ2);
-        juego.iniciarJuego(sc);
+        GUIJuego juego = new GUIJuego(nombreJ1, nombreJ2);
+        juego.iniciarInterfaz();
     }
 }

@@ -35,12 +35,12 @@ public class Jugador {
 
                 if (barco.estaHundido()) {
                     barcosHundidos++;
+                    tableroPropio.marcarBarcoHundido(barco);
                     System.out.println(nombre + ": ¡Barco hundido!");
                 }
                 return true;
             }
         }
-
         // Si no impactó en ningún barco
         tableroPropio.recibirTiro(x, y);
         return false;

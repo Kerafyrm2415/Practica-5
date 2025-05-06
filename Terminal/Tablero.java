@@ -1,13 +1,18 @@
 package Terminal;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Tablero {
     private final int filas = 10;
     private final int columnas = 10;
     private String[][] casilla;
+    private List<Barco> barcos;
+
     public Tablero() {
         casilla = new String[filas][columnas];
+        barcos = new ArrayList<>();
         inicializarTablero();
     }
 
@@ -31,6 +36,7 @@ public class Tablero {
         for (Point p : barco.getPosiciones()) {
             casilla[p.y][p.x] = "🚢";
         }
+        barcos.add(barco);
         return true;
     }
 
@@ -75,16 +81,26 @@ public class Tablero {
         if (!casillaEsValida(x, y)) {
             return false;
         }
-        switch (casilla[y][x]) {
-            case "🚢":
-                casilla[y][x] = "💥";
-                return true;
-            case "🌊":
-                casilla[y][x] = "❌";
-                return false;
-            default:
-                return false; // Ya fue disparada
+
+        String estadoActual = casilla[y][x];
+        if (estadoActual.equals("💥") || estadoActual.equals("❌") || estadoActual.equals("🔥")) {
+            return false; // Ya fue disparada
         }
+
+        if (estadoActual.equals("🚢")) {
+            casilla[y][x] = "💥";
+            // Verificar si algún barco fue hundido
+            for (Barco barco : barcos) {
+                if (barco.recibirImpacto(x, y) && barco.estaHundido()) {
+                    marcarBarcoHundido(barco);
+                }
+            }
+            return true;
+        } else if (estadoActual.equals("🌊")) {
+            casilla[y][x] = "❌";
+            return false;
+        }
+        return false;
     }
 
     public void actualizarCasilla(int fila, int columna, String simbolo) {
@@ -94,6 +110,20 @@ public class Tablero {
     }
 
     public String getCasilla(int fila, int columna) {
+        if (!casillaEsValida(fila, columna)) {
+            return "?";  // Caso de error
+        }
         return casilla[fila][columna];
+    }
+
+    public void marcarBarcoHundido(Barco barco) {
+        for (Point p : barco.getPosiciones()) {
+            if (casillaEsValida(p.x, p.y)) {
+                casilla[p.y][p.x] = "🔥"; // Asigna directamente el emoji
+            }
+        }
+    }
+    public boolean todosBarcosHundidos() {
+        return barcos.stream().allMatch(Barco::estaHundido);
     }
 }
