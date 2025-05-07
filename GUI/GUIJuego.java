@@ -5,11 +5,12 @@ import Terminal.*;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.io.*;
 import java.util.Random;
 
 public class GUIJuego {
-    private final int[] tamañosBarcosJugador1 = {1}; // tamaño de los barcos para pruebas: {5, 4, 3, 3, 2, 2} y {1}
-    private final int[] tamañosBarcosJugador2 = {1};
+    private final int[] tamañosBarcosJugador1 = {5, 4, 3, 3, 2, 2}; // tamaño de los barcos para pruebas: {5, 4, 3, 3, 2, 2} y {1}
+    private final int[] tamañosBarcosJugador2 = {5, 4, 3, 3, 2, 2};
     private int barcoActualJugador1 = 0;
     private int barcoActualJugador2 = 0;
     private boolean colocandoBarcosJugador1 = true;
@@ -52,7 +53,7 @@ public class GUIJuego {
         SwingUtilities.invokeLater(() -> {
             disparoRealizado = false;
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(600, 400);
+            frame.setSize(700, 400);
             JPanel contenedor = new JPanel();
             contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
             labelTurno = new JLabel("Turno de: " + nombreJugador1, SwingConstants.CENTER);
@@ -94,7 +95,7 @@ public class GUIJuego {
                     GUITablero tableroVisualEnemigo = turnoJugador1 ? tableroJugador2 : tableroJugador1;
 
                     String estadoActual = tableroEnemigo.getCasilla(fila, columna);
-                    if (estadoActual.equals("💥") || estadoActual.equals("❌")) {
+                    if (estadoActual.equals("💥") || estadoActual.equals("❌") || estadoActual.equals("🔥")) {
                         JOptionPane.showMessageDialog(null, "Ya disparaste a esta casilla. Intenta con otra.");
                         esTurnoExtra = true;
                         return;
@@ -129,8 +130,13 @@ public class GUIJuego {
             });
             JButton botonImprimir = new JButton("Imprimir Terminal");
             botonImprimir.addActionListener(e -> {
-                imprimirTableroTerminal(tableroJugador1Logico);
-                imprimirTableroTerminal(tableroJugador2Logico);
+                if (turnoJugador1) {
+                    System.out.println("====== TABLERO DE " + nombreJugador1 + " ======");
+                    imprimirTableroTerminal(tableroJugador1Logico);
+                } else {
+                    System.out.println("====== TABLERO DE " + nombreJugador2 + " ======");
+                    imprimirTableroTerminal(tableroJugador2Logico);
+                }
             });
             JButton botonColocarBarco = new JButton("Colocar Barco");
             botonColocarBarco.addActionListener(e -> {
@@ -202,9 +208,24 @@ public class GUIJuego {
                 tableroVisual.actualizarTableroVisual(tableroLogico);
                 tableroVisual.limpiarSeleccion();
             });
+            JButton botonGuardar = new JButton("Guardar Partida");
+            botonGuardar.addActionListener(e -> {
+                guardarPartida("savefile" + ".txt");
+            });
+            JButton botonCargar = new JButton("Cargar Partida");
+            botonCargar.addActionListener(e -> {
+                    GUIJuego juegoCargado = cargarPartida("savefile" + ".txt");
+                    if (juegoCargado != null) {
+                        frame.dispose(); // Cierra la ventana actual
+                        juegoCargado.iniciarInterfaz(); // Abre la partida cargada
+                    }
+            });
+
             panelBotones.add(botonDisparar);
             panelBotones.add(botonColocarBarco);
             panelBotones.add(botonImprimir);
+            panelBotones.add(botonGuardar);
+            panelBotones.add(botonCargar);
 
 
             // Agregamos los frames aqui
@@ -316,7 +337,7 @@ public class GUIJuego {
             fila = random.nextInt(10);  // 0-9
             columna = random.nextInt(10); // 0-9
             estado = tableroJugador1Logico.getCasilla(fila, columna);
-        } while (estado.equals("💥") || estado.equals("❌")); // Repetir si ya fue disparada
+        } while (estado.equals("💥") || estado.equals("❌") || estado.equals("🔥")); // Repetir si ya fue disparada
 
         // Realizar el disparo
         boolean acierto = tableroJugador1Logico.recibirTiro(columna, fila);
@@ -361,5 +382,115 @@ public class GUIJuego {
             System.out.println();
         }
         System.out.println();
+    }
+
+    public void guardarPartida(String nombreArchivo) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(nombreArchivo))) {
+            // Guardar información básica
+            writer.println("Nombres:");
+            writer.println(nombreJugador1);
+            writer.println(nombreJugador2);
+            writer.println("vsCPU:" + vsCPU);
+
+            // Guardar estado del juego
+            writer.println("Estado:");
+            writer.println("turnoJugador1:" + turnoJugador1);
+            writer.println("esTurnoExtra:" + esTurnoExtra);
+            writer.println("colocandoBarcosJugador1:" + colocandoBarcosJugador1);
+            writer.println("colocandoBarcosJugador2:" + colocandoBarcosJugador2);
+            writer.println("barcoActualJugador1:" + barcoActualJugador1);
+            writer.println("barcoActualJugador2:" + barcoActualJugador2);
+
+            // Guardar tableros
+            writer.println("MostrarBarcos:true"); // Forzar a mostrar barcos al guardar
+            guardarTablero(writer, "TableroJugador1", tableroJugador1Logico, true);
+            guardarTablero(writer, "TableroJugador2", tableroJugador2Logico, true);
+
+            JOptionPane.showMessageDialog(frame, "Partida guardada correctamente en " + nombreArchivo);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(frame, "Error al guardar la partida: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void guardarTablero(PrintWriter writer, String nombreTablero, Tablero tablero, boolean mostrarBarcos) {
+        writer.println(nombreTablero + ":");
+        for (int fila = 0; fila < 10; fila++) {
+            for (int col = 0; col < 10; col++) {
+                String estado = tablero.getCasilla(fila, col);
+                // Guardar siempre el estado real, mostrando barcos
+                writer.print(estado + " ");
+            }
+            writer.println();
+        }
+    }
+
+    public static GUIJuego cargarPartida(String nombreArchivo) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(nombreArchivo))) {
+            String linea;
+            String nombreJugador1 = "", nombreJugador2 = "";
+            boolean vsCPU = false;
+            boolean turnoJugador1 = true;
+            boolean esTurnoExtra = false;
+            boolean colocandoBarcosJugador1 = false, colocandoBarcosJugador2 = false;
+            int barcoActualJugador1 = 0, barcoActualJugador2 = 0;
+            Tablero tableroJ1 = new Tablero();
+            Tablero tableroJ2 = new Tablero();
+
+            while ((linea = reader.readLine()) != null) {
+                if (linea.equals("Nombres:")) {
+                    nombreJugador1 = reader.readLine();
+                    nombreJugador2 = reader.readLine();
+                    vsCPU = Boolean.parseBoolean(reader.readLine().split(":")[1]);
+                } else if (linea.equals("Estado:")) {
+                    turnoJugador1 = Boolean.parseBoolean(reader.readLine().split(":")[1]);
+                    esTurnoExtra = Boolean.parseBoolean(reader.readLine().split(":")[1]);
+                    colocandoBarcosJugador1 = Boolean.parseBoolean(reader.readLine().split(":")[1]);
+                    colocandoBarcosJugador2 = Boolean.parseBoolean(reader.readLine().split(":")[1]);
+                    barcoActualJugador1 = Integer.parseInt(reader.readLine().split(":")[1]);
+                    barcoActualJugador2 = Integer.parseInt(reader.readLine().split(":")[1]);
+                } else if (linea.equals("TableroJugador1:")) {
+                    cargarTablero(reader, tableroJ1);
+                } else if (linea.equals("TableroJugador2:")) {
+                    cargarTablero(reader, tableroJ2);
+                }
+            }
+
+            GUIJuego juego = new GUIJuego(nombreJugador1, nombreJugador2);
+            juego.vsCPU = vsCPU;
+            if (vsCPU) {
+                juego = new GUIJuego(nombreJugador1); // Usar constructor para CPU
+            } else {
+                juego = new GUIJuego(nombreJugador1, nombreJugador2);
+            }
+            juego.turnoJugador1 = turnoJugador1;
+            juego.esTurnoExtra = esTurnoExtra;
+            juego.colocandoBarcosJugador1 = colocandoBarcosJugador1;
+            juego.colocandoBarcosJugador2 = colocandoBarcosJugador2;
+            juego.barcoActualJugador1 = barcoActualJugador1;
+            juego.barcoActualJugador2 = barcoActualJugador2;
+
+            juego.tableroJugador1Logico = tableroJ1;
+            juego.tableroJugador2Logico = tableroJ2;
+
+            juego.tableroJugador1.actualizarTableroVisual(tableroJ1);
+            juego.tableroJugador2.actualizarTableroVisual(tableroJ2);
+
+            return juego;
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error al cargar la partida: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+    }
+
+    private static void cargarTablero(BufferedReader reader, Tablero tablero) throws IOException {
+        for (int fila = 0; fila < 10; fila++) {
+            String[] casillas = reader.readLine().trim().split(" ");
+            for (int col = 0; col < 10; col++) {
+                tablero.actualizarCasilla(fila, col, casillas[col]);
+            }
+        }
+        tablero.reconstruirBarcosDesdeGuardado(); // Reconstruye la lista de barcos
     }
 }

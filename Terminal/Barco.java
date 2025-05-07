@@ -8,6 +8,8 @@ public class Barco {
     private List<Point> posiciones;
     private List<Boolean> impactos;
     private int tamaño;
+    private List<int[]> partes;
+    private List<int[]> partesImpactadas;
 
     public Barco(int tamaño) {
         this.tamaño = tamaño;
@@ -16,6 +18,8 @@ public class Barco {
         for (int i = 0; i < tamaño; i++) {
             impactos.add(false);
         }
+        this.partes = new ArrayList<>();
+        this.partesImpactadas = new ArrayList<>();
     }
 
     public Barco(int tamaño, String nombre) {
@@ -38,6 +42,13 @@ public class Barco {
             for (int i = 0; i < tamaño; i++) {
                 posiciones.add(new Point(x, y + i));
             }
+        }
+
+        partes.clear();
+        for (int i = 0; i < this.tamaño; i++) {
+            int c = horizontal ? x + i : x;
+            int f = horizontal ? y : y + i;
+            partes.add(new int[]{c, f});
         }
     }
 
@@ -74,4 +85,27 @@ public class Barco {
     public List<Point> getPosiciones() {
         return posiciones;
     }
+
+    public boolean contieneCasilla(int columna, int fila) {
+        for (int[] parte : partes) {
+            if (parte[0] == columna && parte[1] == fila) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void marcarImpacto(int columna, int fila) {
+        for (int[] parte : partes) {
+            if (parte[0] == columna && parte[1] == fila) {
+                partesImpactadas.add(parte);
+                break;
+            }
+        }
+    }
+
+    public List<int[]> getPartes() {
+        return new ArrayList<>(partes);
+    }
+
 }
