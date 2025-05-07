@@ -5,10 +5,11 @@ import Terminal.*;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.util.Random;
 
 public class GUIJuego {
-    private final int[] tamañosBarcosJugador1 = {5, 4, 3, 3, 2, 2};
-    private final int[] tamañosBarcosJugador2 = {5, 4, 3, 3, 2, 2};
+    private final int[] tamañosBarcosJugador1 = {1}; // tamaño de los barcos para pruebas: {5, 4, 3, 3, 2, 2} y {1}
+    private final int[] tamañosBarcosJugador2 = {1};
     private int barcoActualJugador1 = 0;
     private int barcoActualJugador2 = 0;
     private boolean colocandoBarcosJugador1 = true;
@@ -25,6 +26,7 @@ public class GUIJuego {
     private String nombreJugador1;
     private String nombreJugador2;
     private JLabel labelTurno;
+    private boolean vsCPU = false;
 
 
     public GUIJuego(String nombreJugador1, String nombreJugador2) {
@@ -36,6 +38,14 @@ public class GUIJuego {
         frame = new JFrame("Tablero de BattleShip");
         tableroJugador1 = new GUITablero(10, 10, tableroJugador1Logico);
         tableroJugador2 = new GUITablero(10, 10, tableroJugador2Logico);
+    }
+
+    public GUIJuego(String nombreJugador1) {
+        this(nombreJugador1, "CPU");
+        this.vsCPU = true;
+
+        // Tablero lógico REAL de la CPU (con barcos)
+        colocarBarcosAleatorios(tableroJugador2Logico, tamañosBarcosJugador2);
     }
 
     public void iniciarInterfaz() {
@@ -60,7 +70,6 @@ public class GUIJuego {
             tableroJugador2.getPanel().setVisible(false);
 
             tableroVisual = tableroJugador1;
-
             // Panel Inferior: Donde estan los botones para las acciones
             JPanel panelBotones = new JPanel(new FlowLayout());
             JButton botonDisparar = new JButton("Disparar");
@@ -78,6 +87,7 @@ public class GUIJuego {
 
                 if (fila == -1 || columna == -1) {
                     JOptionPane.showMessageDialog(null, "Selecciona una casilla primero");
+                    return;
                 } else {
                     // Disparamos al tablero del oponente
                     tableroEnemigo = turnoJugador1 ? tableroJugador2Logico : tableroJugador1Logico;
@@ -93,17 +103,14 @@ public class GUIJuego {
                     boolean acierto = tableroEnemigo.recibirTiro(columna, fila);
                     if (acierto) {
                         esTurnoExtra = true;
-                        verificarGanador();
-                        if (verificarGanador() == true){
+                        boolean hayGanador = verificarGanador();
+                        if (hayGanador){
                             return;
                         } else {
-
                             JOptionPane.showMessageDialog(null, "¡Impacto! Puedes volver a disparar.");
-                            // No cambiamos de turno aquí
                             tableroVisual.limpiarSeleccion();
                             return;
                         }
-
                     }
                     String estado = tableroEnemigo.getCasilla(fila, columna);
 
@@ -182,6 +189,15 @@ public class GUIJuego {
                 } else {
                     JOptionPane.showMessageDialog(null, "No se pudo colocar el barco. Revise que en la posición ingresada no esté superpuesto el barco.");
                 }
+                if (vsCPU) {
+                    // Ocultar el tablero de la CPU durante la colocación de barcos
+                    tableroJugador2.getPanel().setVisible(false);
+
+                    // Si es modo CPU, deshabilitar el botón de colocar barcos para el jugador 2
+                    if (!turnoJugador1) {
+                        botonColocarBarco.setEnabled(false);
+                    }
+                }
 
                 tableroVisual.actualizarTableroVisual(tableroLogico);
                 tableroVisual.limpiarSeleccion();
@@ -228,6 +244,10 @@ public class GUIJuego {
         if (!colocandoBarcosJugador1 && !colocandoBarcosJugador2) {
             JOptionPane.showMessageDialog(null, "Turno de " + nombreTurno);
         }
+        // Si es el turno de la CPU, ejecutar acciones automáticas
+        if (vsCPU && !turnoJugador1) {
+            ejecutarTurnoCPU();
+        }
     }
 
     private boolean verificarGanador() {
@@ -251,6 +271,76 @@ public class GUIJuego {
             return !huboGanador;
         }
         return huboGanador;
+    }
+
+    private void colocarBarcosAleatorios(Tablero tablero, int[] tamañosBarcos) {
+        Random random = new Random();
+        for (int tamaño : tamañosBarcos) {
+            boolean colocado = false;
+            int intentos = 0;
+            final int MAX_INTENTOS = 100; // Para evitar bucles infinitos
+
+            while (!colocado && intentos < MAX_INTENTOS) {
+                intentos++;
+
+                int fila = random.nextInt(10);
+                int columna = random.nextInt(10);
+                boolean horizontal = random.nextBoolean();
+
+                // Verificar que el barco no se salga del tablero
+                if (horizontal && columna + tamaño > 10) continue;
+                if (!horizontal && fila + tamaño > 10) continue;
+
+                Barco barco = new Barco(tamaño);
+                barco.colocarEn(columna, fila, horizontal, 10);
+
+                if (tablero.colocarBarco(barco)) {
+                    colocado = true;
+                }
+            }
+
+            if (!colocado) {
+                System.err.println("No se pudo colocar barco de tamaño " + tamaño + " después de " + MAX_INTENTOS + " intentos");
+            }
+        }
+        colocandoBarcosJugador2 = false;
+    }
+
+    private void disparoAleatorioCPU() {
+        Random random = new Random();
+        int fila, columna;
+        String estado;
+
+        // Buscar una casilla no disparada
+        do {
+            fila = random.nextInt(10);  // 0-9
+            columna = random.nextInt(10); // 0-9
+            estado = tableroJugador1Logico.getCasilla(fila, columna);
+        } while (estado.equals("💥") || estado.equals("❌")); // Repetir si ya fue disparada
+
+        // Realizar el disparo
+        boolean acierto = tableroJugador1Logico.recibirTiro(columna, fila);
+        tableroJugador1.actualizarTableroVisual(tableroJugador1Logico);
+
+        // Mostrar mensaje
+        String coordenada = (char)('A' + columna) + "" + (fila + 1);
+        if (acierto) {
+            JOptionPane.showMessageDialog(frame, "CPU disparó a " + coordenada + " ¡y acertó!", "Turno de CPU", JOptionPane.INFORMATION_MESSAGE);
+            cambiarTurno(true); // Cambiar turno después del disparo
+            esTurnoExtra = false;
+        } else {
+            JOptionPane.showMessageDialog(frame, "CPU disparó a " + coordenada + " ¡y falló!", "Turno de CPU", JOptionPane.INFORMATION_MESSAGE);
+            cambiarTurno(false); // Cambiar turno después del disparo
+        }
+    }
+
+    private void ejecutarTurnoCPU() {
+        // Pequeño retraso para mejor experiencia (opcional)
+        Timer timer = new Timer(1000, e -> {
+            disparoAleatorioCPU();
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 
     public void imprimirTableroTerminal(Tablero logico) {

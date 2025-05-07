@@ -21,7 +21,21 @@ public class Main {
             opcion = sc.nextInt();
         }
         if (opcion == 1) {
-            nombrarJugadores(sc);
+            System.out.println("Ingrese el modo de juego:\n1.- Jugador contra el CPU\n2.- Jugador contra jugador");
+            opcion = sc.nextInt();
+            sc.nextLine();
+            while (opcion != 1 && opcion != 2) {
+                System.out.println("Opción no valida: Escriba el numero de una de las dos opciones");
+                opcion = sc.nextInt();
+            }
+            if (opcion == 1) {
+                System.out.print("Nombre del Jugador: ");
+                String nombreJ1 = sc.nextLine();
+                GUIJuego juego = new GUIJuego(nombreJ1);
+                juego.iniciarInterfaz();
+            } else {
+                nombrarJugadores(sc);
+            }
         } else {
             System.out.println("Saliendo del juego...");
         }

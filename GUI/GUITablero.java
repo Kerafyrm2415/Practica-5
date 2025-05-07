@@ -113,8 +113,8 @@ public class GUITablero {
     }
 
     public void limpiarSeleccion() {
-        filaSeleccionada = -2;
-        columnaSeleccionada = -2;
+        filaSeleccionada = -1;
+        columnaSeleccionada = -1;
     }
 
 }
