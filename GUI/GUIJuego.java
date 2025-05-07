@@ -214,11 +214,11 @@ public class GUIJuego {
             });
             JButton botonCargar = new JButton("Cargar Partida");
             botonCargar.addActionListener(e -> {
-                    GUIJuego juegoCargado = cargarPartida("savefile" + ".txt");
-                    if (juegoCargado != null) {
-                        frame.dispose(); // Cierra la ventana actual
-                        juegoCargado.iniciarInterfaz(); // Abre la partida cargada
-                    }
+                GUIJuego juegoCargado = cargarPartida("savefile" + ".txt");
+                if (juegoCargado != null) {
+                    frame.dispose(); // Cierra la ventana actual
+                    juegoCargado.iniciarInterfaz(); // Abre la partida cargada
+                }
             });
 
             panelBotones.add(botonDisparar);
@@ -458,21 +458,39 @@ public class GUIJuego {
 
             GUIJuego juego = new GUIJuego(nombreJugador1, nombreJugador2);
             juego.vsCPU = vsCPU;
+            // Mostrar advertencia solo para modo dos jugadores
             if (vsCPU) {
                 juego = new GUIJuego(nombreJugador1); // Usar constructor para CPU
             } else {
-                juego = new GUIJuego(nombreJugador1, nombreJugador2);
+                int respuesta = JOptionPane.showConfirmDialog(
+                        null,
+                        "AVISO: La función de cargado de partida en el modo de dos jugadores es experimental.\n"
+                                + "Puede haber errores inesperados al disparar o en el estado de los barcos.\n\n"
+                                + "¿Deseas continuar de todos modos?",
+                        "Confirmación de carga",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                if (respuesta != JOptionPane.YES_OPTION) {
+                    return null; // El usuario canceló la carga
+                } else {
+                    juego = new GUIJuego(nombreJugador1, nombreJugador2);
+                }
             }
+            juego.tableroJugador1Logico = tableroJ1;
+            juego.tableroJugador2Logico = tableroJ2;
+
+            juego.tableroJugador1 = new GUITablero(10, 10, tableroJ1);
+            juego.tableroJugador2 = new GUITablero(10, 10, tableroJ2);
+
+
             juego.turnoJugador1 = turnoJugador1;
             juego.esTurnoExtra = esTurnoExtra;
             juego.colocandoBarcosJugador1 = colocandoBarcosJugador1;
             juego.colocandoBarcosJugador2 = colocandoBarcosJugador2;
             juego.barcoActualJugador1 = barcoActualJugador1;
             juego.barcoActualJugador2 = barcoActualJugador2;
-
-            juego.tableroJugador1Logico = tableroJ1;
-            juego.tableroJugador2Logico = tableroJ2;
-
             juego.tableroJugador1.actualizarTableroVisual(tableroJ1);
             juego.tableroJugador2.actualizarTableroVisual(tableroJ2);
 
