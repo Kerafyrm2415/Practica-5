@@ -74,9 +74,6 @@ public class Jugador {
         return tableroRival;
     }
 
-    public List<Barco> getBarcos() {
-        return barcos;
-    }
 
     public int getBarcosHundidos() {
         return barcosHundidos;

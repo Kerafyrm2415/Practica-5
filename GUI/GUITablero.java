@@ -42,34 +42,6 @@ public class GUITablero {
         }
     }
 
-    public GUITablero(int filas, int columnas, BiConsumer<Integer, Integer> manejadorCasilla){
-        panel = new JPanel();
-        panel.setLayout(new GridLayout(filas + 1, columnas + 1));
-        botones = new JButton[filas][columnas];
-
-        panel.add(new JLabel(""));
-        for (int c = 0; c < columnas; c++) {
-            char letra = (char) ('A' + c);
-            panel.add(new JLabel(String.valueOf(letra), SwingConstants.CENTER));
-        }
-
-        for (int f = 0; f < filas; f++) {
-            panel.add(new JLabel(String.valueOf(f + 1), SwingConstants.CENTER));
-            for (int c = 0; c < columnas; c++) {
-                JButton boton = new JButton("🌊");
-                final int fila = f;
-                final int col = c;
-                boton.addActionListener(e -> {
-                    filaSeleccionada = fila;
-                    columnaSeleccionada = col;
-                    System.out.println("Casilla seleccionada: " + (char) ('A' + col) + (fila + 1));
-                    manejadorCasilla.accept(fila, col);
-                });
-                botones[f][c] = boton;
-                panel.add(boton);
-            }
-        }
-    }
 
     public JPanel getPanel() {
         return panel;

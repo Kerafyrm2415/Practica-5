@@ -3,7 +3,6 @@ package GUI;
 import Terminal.*;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.io.*;
 import java.util.Random;
@@ -45,7 +44,6 @@ public class GUIJuego {
         this(nombreJugador1, "CPU");
         this.vsCPU = true;
 
-        // Tablero lógico REAL de la CPU (con barcos)
         colocarBarcosAleatorios(tableroJugador2Logico, tamañosBarcosJugador2);
     }
 
@@ -88,7 +86,6 @@ public class GUIJuego {
 
                 if (fila == -1 || columna == -1) {
                     JOptionPane.showMessageDialog(null, "Selecciona una casilla primero");
-                    return;
                 } else {
                     // Disparamos al tablero del oponente
                     tableroEnemigo = turnoJugador1 ? tableroJugador2Logico : tableroJugador1Logico;
@@ -169,7 +166,7 @@ public class GUIJuego {
                 Barco barco = new Barco(tamaños[barcoActual]);
                 barco.colocarEn(columna, fila, horizontal, 10);
                 int tamaño = tamaños[barcoActual];
-// Verificar que no se salga del tablero
+                // Verificamos que no se salga del tablero
                 if ((horizontal && columna + tamaño > 10) || (!horizontal && fila + tamaño > 10)) {
                     JOptionPane.showMessageDialog(null, "El barco se sale del tablero.");
                     return;
@@ -181,7 +178,7 @@ public class GUIJuego {
                         barcoActualJugador1++;
                         if (barcoActualJugador1 >= tamañosBarcosJugador1.length) {
                             colocandoBarcosJugador1 = false;
-                            JOptionPane.showMessageDialog(null, "Jugador 1 ya colocó todos sus barcos.");
+                            JOptionPane.showMessageDialog(null, nombreJugador1 + " ya colocó todos sus barcos.");
                             cambiarTurno(false);
                         }
                     } else {
@@ -196,10 +193,7 @@ public class GUIJuego {
                     JOptionPane.showMessageDialog(null, "No se pudo colocar el barco. Revise que en la posición ingresada no esté superpuesto el barco.");
                 }
                 if (vsCPU) {
-                    // Ocultar el tablero de la CPU durante la colocación de barcos
-                    tableroJugador2.getPanel().setVisible(false);
-
-                    // Si es modo CPU, deshabilitar el botón de colocar barcos para el jugador 2
+                    // Si es modo CPU, deshabilitamos el botón de colocar barcos para el jugador 2
                     if (!turnoJugador1) {
                         botonColocarBarco.setEnabled(false);
                     }
@@ -218,6 +212,7 @@ public class GUIJuego {
                 if (juegoCargado != null) {
                     frame.dispose(); // Cierra la ventana actual
                     juegoCargado.iniciarInterfaz(); // Abre la partida cargada
+                    JOptionPane.showMessageDialog(null, "¡Partida cargada exitosamente!");
                 }
             });
 
@@ -265,7 +260,7 @@ public class GUIJuego {
         if (!colocandoBarcosJugador1 && !colocandoBarcosJugador2) {
             JOptionPane.showMessageDialog(null, "Turno de " + nombreTurno);
         }
-        // Si es el turno de la CPU, ejecutar acciones automáticas
+        // Si es el turno de la CPU, ejecutamos sus acciones automáticas
         if (vsCPU && !turnoJugador1) {
             ejecutarTurnoCPU();
         }
@@ -273,7 +268,7 @@ public class GUIJuego {
 
     private boolean verificarGanador() {
         boolean huboGanador = false;
-        // Verificar si el jugador 2 ha perdido (todos sus barcos hundidos)
+        // Verificamos si el jugador 2 ha perdido (si todos sus barcos fueron hundidos)
         if (tableroJugador2Logico.todosBarcosHundidos()) {
             JOptionPane.showMessageDialog(frame,
                     "¡Felicidades " + nombreJugador1 + "! ¡Has hundido todos los barcos de " + nombreJugador2 + "!",
@@ -282,7 +277,7 @@ public class GUIJuego {
             frame.dispose();
             return !huboGanador;
         }
-        // Verificar si el jugador 1 ha perdido
+        // En caso de que no, se verifica ahora si el jugador 1 perdio
         else if (tableroJugador1Logico.todosBarcosHundidos()) {
             JOptionPane.showMessageDialog(frame,
                     "¡Felicidades " + nombreJugador2 + "! ¡Has hundido todos los barcos de " + nombreJugador1 + "!",
@@ -299,9 +294,8 @@ public class GUIJuego {
         for (int tamaño : tamañosBarcos) {
             boolean colocado = false;
             int intentos = 0;
-            final int MAX_INTENTOS = 100; // Para evitar bucles infinitos
 
-            while (!colocado && intentos < MAX_INTENTOS) {
+            while (!colocado && intentos < 100) { // Para evitar un bucle infinito, marcara un error si despues de 100 intentos se siguiera colocando mal
                 intentos++;
 
                 int fila = random.nextInt(10);
@@ -321,7 +315,7 @@ public class GUIJuego {
             }
 
             if (!colocado) {
-                System.err.println("No se pudo colocar barco de tamaño " + tamaño + " después de " + MAX_INTENTOS + " intentos");
+                System.err.println("No se pudo colocar barco de tamaño " + tamaño + " después de " + 100 + " intentos");
             }
         }
         colocandoBarcosJugador2 = false;
@@ -332,18 +326,18 @@ public class GUIJuego {
         int fila, columna;
         String estado;
 
-        // Buscar una casilla no disparada
+        // Buscamos una casilla no disparada
         do {
             fila = random.nextInt(10);  // 0-9
             columna = random.nextInt(10); // 0-9
             estado = tableroJugador1Logico.getCasilla(fila, columna);
         } while (estado.equals("💥") || estado.equals("❌") || estado.equals("🔥")); // Repetir si ya fue disparada
 
-        // Realizar el disparo
+        // Realizamos el disparo
         boolean acierto = tableroJugador1Logico.recibirTiro(columna, fila);
         tableroJugador1.actualizarTableroVisual(tableroJugador1Logico);
 
-        // Mostrar mensaje
+        // Mostramos mensaje
         String coordenada = (char)('A' + columna) + "" + (fila + 1);
         if (acierto) {
             JOptionPane.showMessageDialog(frame, "CPU disparó a " + coordenada + " ¡y acertó!", "Turno de CPU", JOptionPane.INFORMATION_MESSAGE);

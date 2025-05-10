@@ -1,7 +1,6 @@
 import java.util.Scanner;
 
 import GUI.GUIJuego;
-import Terminal.*;
 
 public class Main {
     public static void main(String[] args) {
